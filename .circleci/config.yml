@@ -2,11 +2,6 @@ version: 2.1
 
 workflows:
   build-and-test:
-    triggers:
-      - github:
-          # Run on all branches
-          branches:
-            ignore: /.*/
     jobs:
       - build
       - test
