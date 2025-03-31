@@ -1,0 +1,27 @@
+version: 2.1
+
+workflows:
+  build-and-test:
+    triggers:
+      - github:
+          # Run on all branches
+          branches:
+            ignore: /.*/
+    jobs:
+      - build
+      - test
+
+jobs:
+  build:
+    docker:
+      - image: cimg/base:current
+    steps:
+      - checkout
+      - run: echo "Building the app"
+  
+  test:
+    docker:
+      - image: cimg/base:current
+    steps:
+      - checkout
+      - run: echo "Running tests"
