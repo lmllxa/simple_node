@@ -4,7 +4,7 @@
   "description": "",
   "main": "server.js",
   "scripts": {
-    "test": "running test"
+    "test": "echo \"No tests configured\" && exit 0"
   },
   "keywords": [],
   "author": "",
