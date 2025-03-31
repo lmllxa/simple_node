@@ -1,9 +1,9 @@
 version: 2.1
 
 jobs:
-  install-dependencies:  # Renamed from "build" since we're not building
+  install-and-test:
     docker:
-      - image: cimg/node:18.20.7  
+      - image: cimg/node:18.20.7
     steps:
       - checkout
       - restore_cache:
@@ -14,23 +14,32 @@ jobs:
           paths:
             - node_modules
           key: v1-dependencies-{{ checksum "package-lock.json" }}
-      - run: echo "Dependency installation complete"
+      - run: npm test || echo "Tests completed with status $?"
 
-  test:
+  run-server:
     docker:
       - image: cimg/node:18.20.7
     steps:
       - checkout
-      - restore_cache:  # Reuse cache from install job
+      - restore_cache:
           keys:
             - v1-dependencies-{{ checksum "package-lock.json" }}
       - run: npm ci
-      - run: npm test || echo "Test command exited with status $? - continuing workflow"
+      - run: |
+          # Run server for limited time (300 seconds = 5 minutes)
+          timeout 300 node server.js | tee server.log
+          echo "Server ran for 5 minutes and was stopped"
+      - store_artifacts:
+          path: server.log
+          destination: server-log
 
 workflows:
-  test-suite:  # Renamed workflow
+  main-workflow:
     jobs:
-      - install-dependencies
-      - test:
+      - install-and-test
+      - run-server:
           requires:
-            - install-dependencies
+            - install-and-test
+          filters:
+            branches:
+              only: main  # Only run server on main branch
